@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kecil Besar by Vino</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#080b18;color:white;
+  font-family:Arial,sans-serif;text-align:center;
+}
+header{
+  padding:22px;background:linear-gradient(135deg,#7200ff,#00c8ff);
+  font-size:25px;font-weight:bold;
+}
+main{max-width:430px;margin:auto;padding:18px}
+.panel{
+  background:#141a30;border:1px solid #343d60;
+  padding:18px;border-radius:18px;margin:14px 0;
+  box-shadow:0 0 18px #00c8ff22;
+}
+.coins{color:#ffe45e;font-size:27px;font-weight:bold}
+input{
+  width:100%;padding:13px;border-radius:10px;
+  border:1px solid #505a80;background:#090e20;color:white;
+  margin:8px 0;font-size:16px;
+}
+button{
+  border:0;padding:13px;border-radius:10px;
+  font-weight:bold;font-size:16px;cursor:pointer;
+}
+button:active{transform:scale(.96)}
+.buttons{display:flex;gap:10px}
+.buttons button{width:50%;color:white}
+.small{background:#087cff}
+.big{background:#a000ff}
+.play{background:#00e5a0;color:#07121b;width:100%;margin-top:12px}
+.dice{font-size:35px;letter-spacing:5px;min-height:48px}
+#result{font-size:20px;font-weight:bold;margin:12px}
+.note{color:#aab5d4;font-size:12px}
+</style>
+</head>
+<body>
+<header>🎲 KECIL BESAR<br>
+<small style="font-size:13px">BY VINO ⚡</small></header>
+
+<main>
+<div class="panel">
+  <input id="username" placeholder="Masukkan nama pemain">
+  <button class="play" onclick="login()">MASUK GAME</button>
+  <p id="welcome">Masuk untuk mulai bermain!</p>
+</div>
+
+<div class="panel">
+  <div>SALDO KOIN 🪙</div>
+  <div class="coins" id="coins">100</div>
+  <p class="note">Koin virtual untuk hiburan.</p>
+</div>
+
+<div class="panel">
+  <h3>🎲 ARENA DADU 🎲</h3>
+  <div class="dice" id="dice">🎲 🎲 🎲</div>
+  <p>Total dadu: <b id="total">-</b></p>
+  <p>Pilih tebakanmu!</p>
+  <div class="buttons">
+    <button class="small" onclick="choose('Kecil')">🔵 KECIL (9–31)</button>
+    <button class="big" onclick="choose('Besar')">🟣 BESAR (32–54)</button>
+  </div>
+  <input id="bet" type="number" min="1" max="100" value="10"
+  placeholder="Jumlah taruhan koin">
+  <button class="play" onclick="play()">⚡ LEMPAR DADU!</button>
+  <div id="result">Semoga beruntung!</div>
+</div>
+
+<div class="panel">
+  <h3>🏆 CARA BERMAIN</h3>
+  <p>1. Masukkan nama pemain.</p>
+  <p>2. Pilih Kecil atau Besar.</p>
+  <p>3. Tentukan jumlah koin.</p>
+  <p>4. Lempar 9 dadu dan lihat hasilnya!</p>
+  <p class="note">Kecil = total 9–31. Besar = total 32–54.</p>
+</div>
+</main>
+
+<script>
+let player = "";
+let balance = 100;
+let choice = "";
+let busy = false;
+
+function login(){
+  const name = document.getElementById("username").value.trim();
+  if(!name) return alert("Masukkan nama dulu, wak!");
+  player = name;
+  document.getElementById("welcome").textContent = "Halo, " + player + "! 🔥";
+}
+
+function choose(value){
+  choice = value;
+  document.getElementById("result").textContent =
+    "Pilihanmu: " + value;
+}
+
+function updateCoins(){
+  document.getElementById("coins").textContent = balance;
+}
+
+function play(){
+  if(!player) return alert("Masuk game dulu, wak!");
+  if(!choice) return alert("Pilih Kecil atau Besar dulu!");
+
+  const bet = Number(document.getElementById("bet").value);
+  if(!Number.isInteger(bet) || bet < 1 || bet > balance)
+    return alert("Jumlah koin tidak valid!");
+
+  if(busy) return;
+  busy = true;
+  balance -= bet;
+  updateCoins();
+
+  let count = 0;
+  const dice = document.getElementById("dice");
+  const result = document.getElementById("result");
+  const faces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+  const timer = setInterval(() => {
+    dice.textContent = Array.from({length:9},
+      () => faces[Math.floor(Math.random()*6)]).join(" ");
+    count++;
+
+    if(count >= 12){
+      clearInterval(timer);
+      let total = 0;
+      let shown = [];
+      for(let i=0;i<9;i++){
+        const n = Math.floor(Math.random()*6)+1;
+        total += n;
+        shown.push(faces[n-1]);
+      }
+
+      dice.textContent = shown.join(" ");
+      document.getElementById("total").textContent = total;
+      const outcome = total <= 31 ? "Kecil" : "Besar";
+
+      if(outcome === choice){
+        balance += bet * 2;
+        result.textContent = "🔥 MENANG! " + outcome +
+          " — +" + bet + " koin!";
+      }else{
+        result.textContent = "😅 Belum beruntung! Hasil: " + outcome;
+      }
+
+      updateCoins();
+      busy = false;
+    }
+  },100);
+}
+</script>
+</body>
+</html>
